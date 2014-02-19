@@ -1,40 +1,46 @@
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class Retriever {
 
+    private IndexReader reader;
+    private IndexSearcher searcher;
+    private Analyzer analyzer;
     public Retriever(String indxDir) throws IOException, ParseException {
-        IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(indxDir)));
-        IndexSearcher searcher = new IndexSearcher(reader);
-        Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
+        reader = DirectoryReader.open(FSDirectory.open(new File(indxDir)));
+        searcher = new IndexSearcher(reader);
+        analyzer = new StandardAnalyzer(Version.LUCENE_46);
+    }
 
-        QueryParser parser = new QueryParser(Version.LUCENE_46, "title", analyzer);
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in, "UTF-8"));
-        while(true) {
-            System.out.print("Query : ");
-            String line = br.readLine();
+    public void search(String searchFor, String searchInField, int maxHits) throws ParseException, IOException {
+        QueryParser parser = new QueryParser(Version.LUCENE_46, searchInField, analyzer);
+        Query qry = parser.parse(searchFor);
+        System.out.println("Searching for: " + qry.toString());
+        TopDocs results = searcher.search(qry, maxHits);
+        ScoreDoc[] hits = results.scoreDocs;
 
-            if(line == null) break;
-            line = line.trim();
-            if(line.isEmpty()) break;
+        int numTotalHits = results.totalHits;
+        System.out.println(numTotalHits + " total matching documents");
 
-            Query qry = parser.parse(line);
-            System.out.println("Searching for: " + qry.toString("title"));
-            TopDocs results = searcher.search(qry, 100);
+        for(int i = 0; i < hits.length; ++i) {
+            Document doc = searcher.doc(hits[i].doc);
+            System.out.printf("%.10f %s\n", hits[i].score, doc.get("filename"));
         }
     }
+
+
 }

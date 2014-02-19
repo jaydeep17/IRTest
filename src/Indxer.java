@@ -21,7 +21,7 @@ public class Indxer {
         IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46, analyzer);
 
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE); // remove any previous indxes
-        iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);   // keep prev indxes
+//        iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);   // keep prev indxes
 
         indxWriter = new IndexWriter(dir, iwc);
     }
@@ -46,8 +46,6 @@ public class Indxer {
         }
 
         for (File f : files) {
-//            if (f.getName().equals("en.13.1.415.2009.6.2"))
-//                continue;
             System.out.println(f.getName());
             indxFile(f);
         }
