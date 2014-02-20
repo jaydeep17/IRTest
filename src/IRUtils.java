@@ -27,7 +27,12 @@ public class IRUtils {
 
 //    en.13.3.1.2009.6.11
     public static int yearFromFileName(String str) {
-        return Integer.parseInt(str.split("\\.")[4]);
+        try {
+            return Integer.parseInt(str.split("\\.")[4]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+            return -1;
+        }
     }
 
 //    en.13.3.1.2009.6.11

@@ -5,6 +5,17 @@ public class XmlDocument {
     private String filename;
     private String content;
     private String title;
+    private boolean error = false;
+    private static ErrorWriter ew;
+
+    static {
+        try {
+            ew = new ErrorWriter();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public XmlDocument(String filename) throws XMLStreamException, IOException {
         XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -17,12 +28,16 @@ public class XmlDocument {
             sb.append(xmlContent);
         }
         xmlContent = sb.toString();
-        xmlContent = xmlContent.replaceAll("\\s&\\s", " &amp; ");
-        xmlContent = xmlContent.replaceAll("<\\s?br\\s?\\/?>", "");
+        xmlContent = xmlContent.replaceAll("&", "&amp;");
+        xmlContent = xmlContent.replaceAll("<\\s?br\\s?/?>", "");
+        xmlContent = xmlContent.replaceAll("<font[\\sa-zA-Z0-9=]*>", "");
+        xmlContent = xmlContent.replaceAll("</font>", "");
         byte[] byteArray = xmlContent.getBytes("UTF-8");
         ByteArrayInputStream inputStream = new ByteArrayInputStream(byteArray);
         XMLStreamReader reader = factory.createXMLStreamReader(inputStream);
         XMLStreamReader filterReader = factory.createFilteredReader( reader, new MyFilter());
+
+
 
         String tagContent = "";
         boolean append = false;
@@ -32,6 +47,9 @@ public class XmlDocument {
                 event = filterReader.next();
             } catch (XMLStreamException e) {
                 System.out.println("except");
+                ew.write(filename, e.getMessage());
+                error = true;
+                break;
             }
 
 
@@ -76,6 +94,10 @@ public class XmlDocument {
 
     public String getTitle() {
         return title;
+    }
+
+    public boolean isError() {
+        return error;
     }
 }
 

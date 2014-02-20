@@ -28,6 +28,7 @@ public class Indxer {
 
 
     public void indxDir(String dataDir) throws IOException, XMLStreamException {
+        System.out.println("Indexing Dir : " + dataDir);
         final File docDir = new File(dataDir);
         if (!docDir.canRead()) {
             System.out.println("Can't read data Directory");
@@ -46,28 +47,34 @@ public class Indxer {
         }
 
         for (File f : files) {
-            System.out.println(f.getName());
-            indxFile(f);
+            if(f.isDirectory()) {
+                indxDir(f.getAbsolutePath());
+            } else {
+                indxFile(f);
+            }
+
         }
     }
 
 
     public void indxFile(File file) throws IOException, XMLStreamException {
-//        System.out.println(file);
         FileInputStream fis = new FileInputStream( file );
         Document doc = new Document();
         XmlDocument xmldoc = new XmlDocument(file.getAbsolutePath());
-
+        if(xmldoc.isError()) {
+            fis.close();
+            return;
+        }
         String[] dates = IRUtils.extractDate(xmldoc.getContent(), xmldoc.getFilename());
         String delim = "";
         StringBuilder sb = new StringBuilder();
         for (String s : dates) {
             sb.append(delim).append(s);
-            delim = ",";
+            delim = " ";
         }
         String dateData = sb.toString();
         doc.add(new StringField("filename", xmldoc.getFilename(), Field.Store.YES));
-        doc.add(new StringField("title", xmldoc.getTitle(), Field.Store.YES));
+        doc.add(new TextField("title", xmldoc.getTitle(), Field.Store.YES));
         doc.add(new TextField("date", dateData, Field.Store.YES));
         doc.add(new TextField("contents", xmldoc.getContent(), Field.Store.YES));
 
