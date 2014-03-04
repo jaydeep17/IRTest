@@ -43,22 +43,20 @@ public class IRUtils {
         String year = toks[4];
         if(date.length() == 1) date = "0" + date;
         if(month.length() == 1) month = "0" + month;
-        return date+month+year;
+        return year+month+date;
     }
 
-    // ddmm
+    // mmdd
     public static String dateToString(String date, String month) {
         if(date.length() == 1) date = "0"+date;
-        return date+monthAlphaToNum(month);
-        // return date+" "+monthAlphaToNum(month);
+        return monthAlphaToNum(month) + date;
     }
 
-    // ddmmyyyy
+    // yyyymmdd
     public static String dateToString(String date, String month, String year) {
         if(year == null) return dateToString(date, month);
         if(date.length() == 1) date = "0"+date;
-        return date+monthAlphaToNum(month)+year;
-        // return date+" "+monthAlphaToNum(month)+" "+year;
+        return year + monthAlphaToNum(month) + date;
     }
 
     private static String monthAlphaToNum(String str) {

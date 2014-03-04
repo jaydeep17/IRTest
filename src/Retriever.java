@@ -31,7 +31,7 @@ public class Retriever {
         QueryParser parser = new QueryParser(Version.LUCENE_46, searchInField, standardAnalyzer);
         Query qry = parser.parse(searchFor);
         System.out.println("Searching for: " + qry.toString());
-        TopDocs results = searcher.search(qry, maxHits);
+        TopDocs results = searcher.search(qry, maxHits, new Sort(new SortField("title", SortField.Type.STRING)));
         ScoreDoc[] hits = results.scoreDocs;
 
         int numTotalHits = results.totalHits;
@@ -39,31 +39,8 @@ public class Retriever {
 
         for(int i = 0; i < hits.length; ++i) {
             Document doc = searcher.doc(hits[i].doc);
-            System.out.printf("%.10f %s\n", hits[i].score, doc.get("filename"));
-        }
-    }
-
-    public void task2(String date, String title, int maxHits) throws ParseException, IOException {
-        QueryParser dateQP = new QueryParser(Version.LUCENE_46, "date", standardAnalyzer);
-        Query dateQuery = dateQP.parse(date);
-        dateQuery.setBoost((float) 3.0);
-
-        QueryParser titleQP = new QueryParser(Version.LUCENE_46, "title", standardAnalyzer);
-        Query titleQuery = titleQP.parse(title);
-        titleQuery.setBoost((float) 2.0);
-
-        BooleanQuery finalQuery = new BooleanQuery();
-        finalQuery.add(dateQuery, BooleanClause.Occur.MUST);
-        finalQuery.add(titleQuery, BooleanClause.Occur.MUST);
-        TopDocs results = searcher.search(finalQuery, maxHits);
-        ScoreDoc[] hits = results.scoreDocs;
-
-        int numTotalHits = results.totalHits;
-        System.out.println(numTotalHits + " total matching documents");
-
-        for(int i = 0; i < hits.length; ++i) {
-            Document doc = searcher.doc(hits[i].doc);
-            System.out.printf("%.10f %s\n", hits[i].score, doc.get("filename"));
+            System.out.println(doc.get("filename"));
+//            System.out.printf("%.10f %s\n", hits[i].score, doc.get("filename"));
         }
     }
 }
