@@ -11,7 +11,7 @@ import java.util.List;
 
 public final class LuceneUtil {
 
-    public enum Stemmer {Porter, Morpho}
+    public enum Stemmer {Porter, Morpho, Porter2}
 
     private LuceneUtil() {}
 
@@ -52,6 +52,21 @@ public final class LuceneUtil {
                     lst.set(i, MorphaStemmer.stemToken(lst.get(i)));
                 }
                 break;
+            case Porter2:
+                org.tartarus.snowball.ext.PorterStemmer stemmer1 = new org.tartarus.snowball.ext.PorterStemmer();
+                for(int i = 0; i < lst.size(); ++i) {
+                    stemmer1.setCurrent(lst.get(i));
+                    stemmer1.stem();
+                    lst.set(i, stemmer1.getCurrent());
+                }
+                break;
+        }
+
+        // none of the above stemmers remove apostrophe S
+        for(int i = 0; i < lst.size(); ++i) {
+            String str = lst.get(i);
+            str = str.replaceAll("\'$", "");
+            lst.set(i, str);
         }
         return lst;
     }
