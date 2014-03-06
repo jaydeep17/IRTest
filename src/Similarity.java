@@ -29,7 +29,9 @@ public class Similarity {
                 sum += Similarity.word(t1, t2);
             }
         }
-        sum /= (tokens1.size() + tokens2.size())/2.0;
+
+        sum *= 10;
+        sum /= (tokens1.size() * tokens2.size());
         return sum;
     }
 
